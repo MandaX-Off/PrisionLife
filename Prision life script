@@ -1,73 +1,92 @@
+-- Servicios
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
 
-local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+-- Crear GUI principal
+local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "MandaXMainGUI"
 gui.ResetOnSpawn = false
-gui.Enabled = true
 
--- Sidebar
-local sidebar = Instance.new("Frame", gui)
-sidebar.Size = UDim2.new(0, 120, 1, 0)
-sidebar.Position = UDim2.new(0, 0, 0, 0)
-sidebar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-sidebar.BorderSizePixel = 0
+-- Frame principal (menú)
+local menuFrame = Instance.new("Frame", gui)
+menuFrame.Size = UDim2.new(0, 400, 0, 650)
+menuFrame.Position = UDim2.new(0, 20, 0, 20)
+menuFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+menuFrame.BorderSizePixel = 0
+menuFrame.Visible = true
 
-local function createSidebarButton(name, text, yPos)
-    local btn = Instance.new("TextButton", sidebar)
-    btn.Name = name .. "Btn"
-    btn.Size = UDim2.new(1, -10, 0, 40)
-    btn.Position = UDim2.new(0, 5, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.BorderSizePixel = 0
-    btn.Font = Enum.Font.FredokaOne
-    btn.TextSize = 16
-    btn.TextColor3 = Color3.new(1, 1, 1)
+-- Botón móvil toggle (siempre visible)
+local mobileToggleBtn = Instance.new("TextButton", gui)
+mobileToggleBtn.Size = UDim2.new(0, 140, 0, 40)
+mobileToggleBtn.Position = UDim2.new(1, -160, 0, 20)
+mobileToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+mobileToggleBtn.TextColor3 = Color3.new(0, 0, 0)
+mobileToggleBtn.Font = Enum.Font.FredokaOne
+mobileToggleBtn.TextSize = 18
+mobileToggleBtn.Text = "Mostrar/Ocultar menú"
+mobileToggleBtn.ZIndex = 10
+
+mobileToggleBtn.MouseButton1Click:Connect(function()
+    menuFrame.Visible = not menuFrame.Visible
+end)
+
+-- Toggle menú con tecla P
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.P then
+        menuFrame.Visible = not menuFrame.Visible
+    end
+end)
+
+-- Aquí empieza la integración de tus scripts dentro del menúFrame --
+
+-- Para evitar repetición, hago funciones para crear marcos y botones
+
+local function createSection(titleText, yPos, bgColor)
+    local frame = Instance.new("Frame", menuFrame)
+    frame.Size = UDim2.new(1, -40, 0, 100)
+    frame.Position = UDim2.new(0, 20, 0, yPos)
+    frame.BackgroundColor3 = bgColor
+    frame.BorderSizePixel = 3
+    frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    frame.Active = true
+    frame.Draggable = true
+
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 25)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.FredokaOne
+    title.TextSize = 22
+    title.TextColor3 = Color3.new(0, 0, 0)
+    title.Text = titleText
+
+    return frame
+end
+
+local function createButton(parent, text, yPos, color, textColor)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1, -20, 0, 40)
+    btn.Position = UDim2.new(0, 10, 0, yPos)
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = textColor or Color3.new(0, 0, 0)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 20
     btn.Text = text
     return btn
 end
 
--- Frames para secciones
-local sections = {}
-
--- --- Noclip Section ---
-local noclipFrame = Instance.new("Frame", gui)
-noclipFrame.Size = UDim2.new(0, 400, 0, 120)
-noclipFrame.Position = UDim2.new(0, 130, 0, 20)
-noclipFrame.BackgroundColor3 = Color3.fromRGB(255, 235, 100)
-noclipFrame.BorderSizePixel = 4
-noclipFrame.BorderColor3 = Color3.fromRGB(255, 170, 0)
-noclipFrame.Active = true
-noclipFrame.Draggable = true
-sections["noclip"] = noclipFrame
-
-local noclipTitle = Instance.new("TextLabel", noclipFrame)
-noclipTitle.Size = UDim2.new(1, 0, 0, 30)
-noclipTitle.Position = UDim2.new(0, 0, 0, 0)
-noclipTitle.BackgroundTransparency = 1
-noclipTitle.Text = "👻 MandaX Noclip"
-noclipTitle.Font = Enum.Font.FredokaOne
-noclipTitle.TextSize = 20
-noclipTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-local noclipButton = Instance.new("TextButton", noclipFrame)
-noclipButton.Size = UDim2.new(1, -20, 0, 50)
-noclipButton.Position = UDim2.new(0, 10, 0, 50)
-noclipButton.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-noclipButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-noclipButton.Font = Enum.Font.SourceSansBold
-noclipButton.TextSize = 22
-noclipButton.Text = "Noclip OFF"
-
-local noclip = false
-local noclipConnection = nil
+-- Noclip Section
+local noclipFrame = createSection("Noclip", 10, Color3.fromRGB(255, 200, 0))
+local noclipEnabled = false
+local noclipConnection
 
 local function setCanCollide(state)
-    if LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = state
             end
@@ -77,9 +96,7 @@ end
 
 local function startNoclip()
     noclipConnection = RunService.Stepped:Connect(function()
-        if LocalPlayer.Character then
-            setCanCollide(false)
-        end
+        setCanCollide(false)
     end)
 end
 
@@ -91,86 +108,57 @@ local function stopNoclip()
     setCanCollide(true)
 end
 
-local function toggleNoclip()
-    noclip = not noclip
-    if noclip then
+local noclipBtn = createButton(noclipFrame, "Activar Noclip", 40, Color3.fromRGB(255, 170, 0))
+noclipBtn.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    if noclipEnabled then
         startNoclip()
-        noclipButton.Text = "Noclip ON"
-        print("Noclip activado")
+        noclipBtn.Text = "Desactivar Noclip"
     else
         stopNoclip()
-        noclipButton.Text = "Noclip OFF"
-        print("Noclip desactivado")
+        noclipBtn.Text = "Activar Noclip"
     end
-end
-
-noclipButton.MouseButton1Click:Connect(toggleNoclip)
+end)
 
 UIS.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.N and not gameProcessed then
-        toggleNoclip()
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.N then
+        noclipBtn.MouseButton1Click:Wait()
+        noclipBtn.MouseButton1Click:Fire()
     end
 end)
 
 LocalPlayer.CharacterAdded:Connect(function(char)
-    if noclip then
-        wait(1)
+    wait(1)
+    if noclipEnabled then
         startNoclip()
     end
 end)
 
--- --- Speed Section ---
-local speedFrame = Instance.new("Frame", gui)
-speedFrame.Size = UDim2.new(0, 400, 0, 140)
-speedFrame.Position = UDim2.new(0, 130, 0, 20)
-speedFrame.BackgroundColor3 = Color3.fromRGB(255, 235, 100)
-speedFrame.BorderSizePixel = 4
-speedFrame.BorderColor3 = Color3.fromRGB(255, 170, 0)
-speedFrame.Active = true
-speedFrame.Draggable = true
-speedFrame.Visible = false
-sections["speed"] = speedFrame
-
-local speedTitle = Instance.new("TextLabel", speedFrame)
-speedTitle.Size = UDim2.new(1, 0, 0, 30)
-speedTitle.Position = UDim2.new(0, 0, 0, 0)
-speedTitle.BackgroundTransparency = 1
-speedTitle.Text = "⚡ MandaX Speed Hack"
-speedTitle.Font = Enum.Font.FredokaOne
-speedTitle.TextSize = 20
-speedTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
+-- Speed Section
+local speedFrame = createSection("Speed", 120, Color3.fromRGB(255, 235, 100))
 local speedInput = Instance.new("TextBox", speedFrame)
 speedInput.Size = UDim2.new(1, -20, 0, 40)
 speedInput.Position = UDim2.new(0, 10, 0, 40)
 speedInput.PlaceholderText = "Velocidad (ej: 100)"
 speedInput.Font = Enum.Font.GothamBold
 speedInput.TextSize = 20
-speedInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+speedInput.TextColor3 = Color3.new(0, 0, 0)
 speedInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 speedInput.Text = ""
 
-local speedButton = Instance.new("TextButton", speedFrame)
-speedButton.Size = UDim2.new(1, -20, 0, 35)
-speedButton.Position = UDim2.new(0, 10, 0, 90)
-speedButton.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-speedButton.Text = "Activar velocidad"
-speedButton.Font = Enum.Font.SourceSansBold
-speedButton.TextSize = 20
-speedButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-speedButton.MouseButton1Click:Connect(function()
+local speedBtn = createButton(speedFrame, "Activar Velocidad", 85, Color3.fromRGB(255, 200, 0))
+speedBtn.MouseButton1Click:Connect(function()
     local value = tonumber(speedInput.Text)
     if value and value > 0 then
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.WalkSpeed = value
-            speedButton.Text = "Velocidad: " .. value
+            speedBtn.Text = "Velocidad: " .. value
         end
     else
-        speedButton.Text = "Valor inválido"
+        speedBtn.Text = "Valor inválido"
         wait(1)
-        speedButton.Text = "Activar velocidad"
+        speedBtn.Text = "Activar Velocidad"
     end
 end)
 
@@ -185,52 +173,18 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end
 end)
 
--- --- Fly Section ---
-local flyFrame = Instance.new("Frame", gui)
-flyFrame.Size = UDim2.new(0, 400, 0, 110)
-flyFrame.Position = UDim2.new(0, 130, 0, 20)
-flyFrame.BackgroundColor3 = Color3.fromRGB(200, 235, 255)
-flyFrame.BorderSizePixel = 4
-flyFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-flyFrame.Active = true
-flyFrame.Draggable = true
-flyFrame.Visible = false
-sections["fly"] = flyFrame
-
-local flyTitle = Instance.new("TextLabel", flyFrame)
-flyTitle.Size = UDim2.new(1, 0, 0, 30)
-flyTitle.Position = UDim2.new(0, 0, 0, 0)
-flyTitle.BackgroundTransparency = 1
-flyTitle.Text = "🕊️ MandaX Fly Hack"
-flyTitle.Font = Enum.Font.FredokaOne
-flyTitle.TextSize = 20
-flyTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-local flyButton = Instance.new("TextButton", flyFrame)
-flyButton.Size = UDim2.new(1, -20, 0, 50)
-flyButton.Position = UDim2.new(0, 10, 0, 45)
-flyButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-flyButton.Text = "Activar Fly"
-flyButton.Font = Enum.Font.SourceSansBold
-flyButton.TextSize = 22
-flyButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-
+-- Fly Section
+local flyFrame = createSection("Fly", 230, Color3.fromRGB(200, 235, 255))
 local flying = false
 local flyConnection
+local flyBtn = createButton(flyFrame, "Activar Fly", 40, Color3.fromRGB(0, 200, 255))
 
 local function setFly(active)
     flying = active
     local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.PlatformStand = false
-    end
-
-    if flyConnection then
-        flyConnection:Disconnect()
-        flyConnection = nil
-    end
-
+    if humanoid then humanoid.PlatformStand = false end
+    if flyConnection then flyConnection:Disconnect() flyConnection = nil end
     if flying and root then
         local bv = Instance.new("BodyVelocity")
         bv.Name = "FlyVelocity"
@@ -260,21 +214,21 @@ local function setFly(active)
             root.FlyVelocity.Velocity = moveVec
         end)
 
-        flyButton.Text = "Desactivar Fly"
+        flyBtn.Text = "Desactivar Fly"
     else
         if root and root:FindFirstChild("FlyVelocity") then
             root.FlyVelocity:Destroy()
         end
-        flyButton.Text = "Activar Fly"
+        flyBtn.Text = "Activar Fly"
     end
 end
 
-flyButton.MouseButton1Click:Connect(function()
+flyBtn.MouseButton1Click:Connect(function()
     setFly(not flying)
 end)
 
 UIS.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.F and not gameProcessed then
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.F then
         setFly(not flying)
     end
 end)
@@ -286,42 +240,15 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end
 end)
 
--- --- Kill Aura Section ---
-local killAuraFrame = Instance.new("Frame", gui)
-killAuraFrame.Size = UDim2.new(0, 400, 0, 100)
-killAuraFrame.Position = UDim2.new(0, 130, 0, 20)
-killAuraFrame.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-killAuraFrame.BorderSizePixel = 4
-killAuraFrame.BorderColor3 = Color3.fromRGB(170, 0, 0)
-killAuraFrame.Active = true
-killAuraFrame.Draggable = true
-killAuraFrame.Visible = false
-sections["killAura"] = killAuraFrame
-
-local killAuraTitle = Instance.new("TextLabel", killAuraFrame)
-killAuraTitle.Size = UDim2.new(1, 0, 0, 30)
-killAuraTitle.Position = UDim2.new(0, 0, 0, 0)
-killAuraTitle.BackgroundTransparency = 1
-killAuraTitle.Text = "💣 MandaX Kill Aura Ultra"
-killAuraTitle.Font = Enum.Font.FredokaOne
-killAuraTitle.TextSize = 20
-killAuraTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-local killAuraButton = Instance.new("TextButton", killAuraFrame)
-killAuraButton.Size = UDim2.new(1, -20, 0, 40)
-killAuraButton.Position = UDim2.new(0, 10, 0, 50)
-killAuraButton.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
-killAuraButton.Text = "Activar Kill Aura"
-killAuraButton.Font = Enum.Font.SourceSansBold
-killAuraButton.TextSize = 20
-killAuraButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-
+-- Kill Aura Section
+local killAuraFrame = createSection("Kill Aura", 340, Color3.fromRGB(255, 80, 80))
 local auraEnabled = false
 local killAuraConnection
+local killAuraBtn = createButton(killAuraFrame, "Activar Kill Aura", 40, Color3.fromRGB(255, 40, 40))
 
-local function toggleAura()
+killAuraBtn.MouseButton1Click:Connect(function()
     auraEnabled = not auraEnabled
-    killAuraButton.Text = auraEnabled and "Desactivar Kill Aura" or "Activar Kill Aura"
+    killAuraBtn.Text = auraEnabled and "Desactivar Kill Aura" or "Activar Kill Aura"
 
     if auraEnabled then
         killAuraConnection = RunService.RenderStepped:Connect(function()
@@ -348,42 +275,14 @@ local function toggleAura()
             killAuraConnection = nil
         end
     end
-end
+end)
 
-killAuraButton.MouseButton1Click:Connect(toggleAura)
-
--- --- TP Cárcel Section ---
+-- Teleport Cárcel Section
+local tpJailFrame = createSection("Teleport Cárcel", 450, Color3.fromRGB(80, 130, 200))
+local tpJailBtn = createButton(tpJailFrame, "Ir a la Cárcel", 40, Color3.fromRGB(60, 100, 180))
 local jailPosition = Vector3.new(910.18, 107.32, 2375.59)
 
-local tpJailFrame = Instance.new("Frame", gui)
-tpJailFrame.Size = UDim2.new(0, 400, 0, 100)
-tpJailFrame.Position = UDim2.new(0, 130, 0, 20)
-tpJailFrame.BackgroundColor3 = Color3.fromRGB(80, 130, 200)
-tpJailFrame.BorderSizePixel = 4
-tpJailFrame.BorderColor3 = Color3.fromRGB(40, 80, 150)
-tpJailFrame.Active = true
-tpJailFrame.Draggable = true
-tpJailFrame.Visible = false
-sections["tpJail"] = tpJailFrame
-
-local tpJailTitle = Instance.new("TextLabel", tpJailFrame)
-tpJailTitle.Size = UDim2.new(1, 0, 0, 30)
-tpJailTitle.BackgroundTransparency = 1
-tpJailTitle.Text = "🚓 Teleport Cárcel"
-tpJailTitle.Font = Enum.Font.FredokaOne
-tpJailTitle.TextSize = 20
-tpJailTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-local tpJailButton = Instance.new("TextButton", tpJailFrame)
-tpJailButton.Size = UDim2.new(1, -20, 0, 50)
-tpJailButton.Position = UDim2.new(0, 10, 0, 40)
-tpJailButton.BackgroundColor3 = Color3.fromRGB(60, 100, 180)
-tpJailButton.Text = "Ir a la Cárcel"
-tpJailButton.Font = Enum.Font.SourceSansBold
-tpJailButton.TextSize = 18
-tpJailButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-tpJailButton.MouseButton1Click:Connect(function()
+tpJailBtn.MouseButton1Click:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -391,38 +290,12 @@ tpJailButton.MouseButton1Click:Connect(function()
     hrp.CFrame = CFrame.new(jailPosition)
 end)
 
--- --- Escapar Section ---
+-- Escapar Section
+local escapeFrame = createSection("Escapar", 560, Color3.fromRGB(80, 160, 90))
+local escapeBtn = createButton(escapeFrame, "Escapar", 40, Color3.fromRGB(70, 200, 120))
 local escapePosition = Vector3.new(-942.53, 94.13, 2060.42)
 
-local escapeFrame = Instance.new("Frame", gui)
-escapeFrame.Size = UDim2.new(0, 400, 0, 100)
-escapeFrame.Position = UDim2.new(0, 130, 0, 20)
-escapeFrame.BackgroundColor3 = Color3.fromRGB(80, 160, 90)
-escapeFrame.BorderSizePixel = 4
-escapeFrame.BorderColor3 = Color3.fromRGB(40, 120, 60)
-escapeFrame.Active = true
-escapeFrame.Draggable = true
-escapeFrame.Visible = false
-sections["escape"] = escapeFrame
-
-local escapeTitle = Instance.new("TextLabel", escapeFrame)
-escapeTitle.Size = UDim2.new(1, 0, 0, 30)
-escapeTitle.BackgroundTransparency = 1
-escapeTitle.Text = "🏃 Escapar"
-escapeTitle.Font = Enum.Font.FredokaOne
-escapeTitle.TextSize = 20
-escapeTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
-
-local escapeButton = Instance.new("TextButton", escapeFrame)
-escapeButton.Size = UDim2.new(1, -20, 0, 50)
-escapeButton.Position = UDim2.new(0, 10, 0, 40)
-escapeButton.BackgroundColor3 = Color3.fromRGB(70, 200, 120)
-escapeButton.Text = "Escapar"
-escapeButton.Font = Enum.Font.SourceSansBold
-escapeButton.TextSize = 18
-escapeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-escapeButton.MouseButton1Click:Connect(function()
+escapeBtn.MouseButton1Click:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -430,25 +303,100 @@ escapeButton.MouseButton1Click:Connect(function()
     hrp.CFrame = CFrame.new(escapePosition)
 end)
 
--- --- Teleport to Player Section ---
-local tpPlayerFrame = Instance.new("Frame", gui)
-tpPlayerFrame.Size = UDim2.new(0, 400, 0, 200)
-tpPlayerFrame.Position = UDim2.new(0, 130, 0, 20)
-tpPlayerFrame.BackgroundColor3 = Color3.fromRGB(120, 150, 230)
-tpPlayerFrame.BorderSizePixel = 4
-tpPlayerFrame.BorderColor3 = Color3.fromRGB(80, 110, 200)
-tpPlayerFrame.Active = true
-tpPlayerFrame.Draggable = true
-tpPlayerFrame.Visible = false
-sections["tpPlayer"] = tpPlayerFrame
+-- Spawn Car Section (ubicado en otro frame para no quedar muy largo)
+local spawnCarFrame = createSection("Spawn Car", 670, Color3.fromRGB(60, 60, 60))
+spawnCarFrame.Size = UDim2.new(1, -40, 0, 100)
+spawnCarFrame.Position = UDim2.new(0, 20, 0, 670)
+local spawnCarBtn = createButton(spawnCarFrame, "Spawn Car y Subir", 40, Color3.fromRGB(30, 150, 30))
 
-local tpPlayerTitle = Instance.new("TextLabel", tpPlayerFrame)
-tpPlayerTitle.Size = UDim2.new(1, 0, 0, 30)
-tpPlayerTitle.BackgroundTransparency = 1
-tpPlayerTitle.Text = "📍 Teleport a Jugador"
-tpPlayerTitle.Font = Enum.Font.FredokaOne
-tpPlayerTitle.TextSize = 20
-tpPlayerTitle.TextColor3 = Color3.fromRGB(0, 0, 0)
+local spawnCarPosition = Vector3.new(-191.80, 54.77, 1880.36)
+
+local workspace = game:GetService("Workspace")
+
+local function findButtonUnderCharacter(hrp, maxDistance)
+    maxDistance = maxDistance or 6
+    local closestButton = nil
+    local closestDistance = maxDistance + 1
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj:FindFirstChildOfClass("ClickDetector") then
+            local distance = (obj.Position - hrp.Position).Magnitude
+            if distance <= maxDistance and distance < closestDistance then
+                closestButton = obj
+                closestDistance = distance
+            end
+        end
+    end
+
+    return closestButton
+end
+
+local function findDriverSeatNear(position, radius)
+    radius = radius or 10
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("VehicleSeat") and (obj.Position - position).Magnitude <= radius then
+            return obj
+        end
+    end
+    return nil
+end
+
+spawnCarBtn.MouseButton1Click:Connect(function()
+    local character = LocalPlayer.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local originalPosition = hrp.Position
+    hrp.CFrame = CFrame.new(spawnCarPosition + Vector3.new(0, 5, 0))
+
+    wait(1.5)
+
+    local buttonPart = findButtonUnderCharacter(hrp, 6)
+    if buttonPart then
+        local clickDetector = buttonPart:FindFirstChildOfClass("ClickDetector")
+        if clickDetector then
+            fireclickdetector(clickDetector)
+        else
+            warn("[SpawnCar] No ClickDetector encontrado.")
+            return
+        end
+    else
+        warn("[SpawnCar] No botón con ClickDetector cerca.")
+        return
+    end
+
+    wait(2)
+
+    local driverSeat = findDriverSeatNear(hrp.Position, 10)
+    if driverSeat then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Sit = true
+            driverSeat:Sit(humanoid)
+            wait(0.5)
+        else
+            warn("[SpawnCar] No humanoid encontrado.")
+        end
+
+        local vehicleModel = driverSeat:FindFirstAncestorWhichIsA("Model")
+        if vehicleModel then
+            if vehicleModel.PrimaryPart then
+                vehicleModel:SetPrimaryPartCFrame(CFrame.new(originalPosition + Vector3.new(0, 5, 0)))
+            else
+                driverSeat.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))
+            end
+        else
+            warn("[SpawnCar] No modelo vehículo encontrado.")
+        end
+    else
+        warn("[SpawnCar] No asiento conductor cerca.")
+    end
+end)
+
+-- Teleport a Jugador Section
+local tpPlayerFrame = createSection("Teleport a Jugador", 780, Color3.fromRGB(120, 150, 230))
+tpPlayerFrame.Size = UDim2.new(1, -40, 0, 190)
 
 local dropdown = Instance.new("TextButton", tpPlayerFrame)
 dropdown.Size = UDim2.new(1, -20, 0, 35)
@@ -457,7 +405,7 @@ dropdown.BackgroundColor3 = Color3.fromRGB(180, 210, 255)
 dropdown.Text = "Seleccionar jugador"
 dropdown.Font = Enum.Font.GothamBold
 dropdown.TextSize = 18
-dropdown.TextColor3 = Color3.fromRGB(0, 0, 0)
+dropdown.TextColor3 = Color3.new(0, 0, 0)
 
 local selectedPlayer = nil
 
@@ -493,7 +441,7 @@ local function refreshPlayers()
             btn.Text = plr.Name
             btn.Font = Enum.Font.Gotham
             btn.TextSize = 16
-            btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+            btn.TextColor3 = Color3.new(0, 0, 0)
             btn.Parent = menu
 
             btn.MouseButton1Click:Connect(function()
@@ -512,16 +460,9 @@ refreshPlayers()
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
 
-local tpButton = Instance.new("TextButton", tpPlayerFrame)
-tpButton.Size = UDim2.new(1, -20, 0, 40)
-tpButton.Position = UDim2.new(0, 10, 1, -50)
-tpButton.BackgroundColor3 = Color3.fromRGB(100, 150, 250)
-tpButton.Text = "Teleportear"
-tpButton.Font = Enum.Font.GothamBold
-tpButton.TextSize = 18
-tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+local tpBtn = createButton(tpPlayerFrame, "Teleportear", 170, Color3.fromRGB(100, 150, 250), Color3.new(1,1,1))
 
-tpButton.MouseButton1Click:Connect(function()
+tpBtn.MouseButton1Click:Connect(function()
     if selectedPlayer and selectedPlayer.Character then
         local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
         local myChar = LocalPlayer.Character
@@ -534,184 +475,4 @@ tpButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- --- Spawn Car Section ---
-local spawnCarPosition = Vector3.new(-191.80, 54.77, 1880.36)
-
-local spawnCarFrame = Instance.new("Frame", gui)
-spawnCarFrame.Size = UDim2.new(0, 400, 0, 100)
-spawnCarFrame.Position = UDim2.new(0, 130, 0, 20)
-spawnCarFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-spawnCarFrame.BorderSizePixel = 2
-spawnCarFrame.BorderColor3 = Color3.fromRGB(30, 30, 30)
-spawnCarFrame.Active = true
-spawnCarFrame.Draggable = true
-spawnCarFrame.Visible = false
-sections["spawnCar"] = spawnCarFrame
-
-local spawnCarTitle = Instance.new("TextLabel", spawnCarFrame)
-spawnCarTitle.Size = UDim2.new(1, 0, 0, 30)
-spawnCarTitle.BackgroundTransparency = 1
-spawnCarTitle.Text = "🚗 Spawn Car"
-spawnCarTitle.Font = Enum.Font.FredokaOne
-spawnCarTitle.TextSize = 20
-spawnCarTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-local spawnCarButton = Instance.new("TextButton", spawnCarFrame)
-spawnCarButton.Size = UDim2.new(1, -20, 0, 50)
-spawnCarButton.Position = UDim2.new(0, 10, 0, 40)
-spawnCarButton.BackgroundColor3 = Color3.fromRGB(30, 150, 30)
-spawnCarButton.Text = "Spawn Car y Subir"
-spawnCarButton.Font = Enum.Font.SourceSansBold
-spawnCarButton.TextSize = 18
-spawnCarButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-local function findButtonUnderCharacter(hrp, maxDistance)
-    maxDistance = maxDistance or 6
-    local closestButton = nil
-    local closestDistance = maxDistance + 1
-
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj:FindFirstChildOfClass("ClickDetector") then
-            local distance = (obj.Position - hrp.Position).Magnitude
-            if distance <= maxDistance and distance < closestDistance then
-                closestButton = obj
-                closestDistance = distance
-            end
-        end
-    end
-
-    return closestButton
-end
-
-local function findDriverSeatNear(position, radius)
-    radius = radius or 10
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("VehicleSeat") and (obj.Position - position).Magnitude <= radius then
-            return obj
-        end
-    end
-    return nil
-end
-
-local function teleportAndSpawnCar()
-    local character = LocalPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local originalPosition = hrp.Position
-
-    -- Teleportar un poco por encima para evitar colisiones
-    hrp.CFrame = CFrame.new(spawnCarPosition + Vector3.new(0, 5, 0))
-    print("[SpawnCar] Teleportado al spawn del carro")
-
-    wait(1.5) -- esperar a que todo cargue
-
-    local buttonPart = findButtonUnderCharacter(hrp, 6)
-    if buttonPart then
-        print("[SpawnCar] Botón encontrado:", buttonPart:GetFullName())
-
-        local clickDetector = buttonPart:FindFirstChildOfClass("ClickDetector")
-        if clickDetector then
-            print("[SpawnCar] Disparando ClickDetector...")
-            fireclickdetector(clickDetector)
-        else
-            print("[SpawnCar] No se encontró ClickDetector en el botón.")
-            return
-        end
-    else
-        warn("[SpawnCar] No se encontró botón con ClickDetector cerca.")
-        return
-    end
-
-    wait(2) -- Esperar que el vehículo aparezca
-
-    local driverSeat = findDriverSeatNear(hrp.Position, 10)
-    if driverSeat then
-        print("[SpawnCar] Asiento de conductor encontrado:", driverSeat:GetFullName())
-
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.Sit = true
-            driverSeat:Sit(humanoid)
-            wait(0.5)
-        else
-            warn("[SpawnCar] No se encontró Humanoid en el personaje.")
-        end
-
-        local vehicleModel = driverSeat:FindFirstAncestorWhichIsA("Model")
-        if vehicleModel then
-            if vehicleModel.PrimaryPart then
-                vehicleModel:SetPrimaryPartCFrame(CFrame.new(originalPosition + Vector3.new(0, 5, 0)))
-            else
-                driverSeat.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))
-            end
-            print("[SpawnCar] Vehículo movido a la posición original")
-        else
-            print("[SpawnCar] No se encontró modelo del vehículo.")
-        end
-    else
-        warn("[SpawnCar] No se encontró asiento de conductor cerca.")
-    end
-end
-
-spawnCarButton.MouseButton1Click:Connect(teleportAndSpawnCar)
-
--- --- Función para ocultar/mostrar secciones y botones ---
-local function showSection(name)
-    for key, frame in pairs(sections) do
-        frame.Visible = (key == name)
-    end
-end
-
--- Crear botones en sidebar y conectar
-local y = 10
-local sectionNames = {
-    {name = "noclip", text = "Noclip"},
-    {name = "speed", text = "Speed"},
-    {name = "fly", text = "Fly"},
-    {name = "killAura", text = "Kill Aura"},
-    {name = "tpJail", text = "TP Cárcel"},
-    {name = "escape", text = "Escapar"},
-    {name = "tpPlayer", text = "TP Jugador"},
-    {name = "spawnCar", text = "Spawn Car"},
-}
-
-for _, data in ipairs(sectionNames) do
-    local btn = createSidebarButton(data.name, data.text, y)
-    y = y + 50
-    btn.MouseButton1Click:Connect(function()
-        showSection(data.name)
-    end)
-end
-
--- Mostrar noclip por defecto
-showSection("noclip")
-
--- --- Botón para ocultar menú en cada sección ---
-local function addHideButtonToSection(frame)
-    local hideBtn = Instance.new("TextButton", frame)
-    hideBtn.Name = "HideMenuButton"
-    hideBtn.Size = UDim2.new(0, 100, 0, 30)
-    hideBtn.Position = UDim2.new(1, -110, 0, 5)
-    hideBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-    hideBtn.Font = Enum.Font.FredokaOne
-    hideBtn.TextSize = 18
-    hideBtn.TextColor3 = Color3.new(1,1,1)
-    hideBtn.Text = "Ocultar menú"
-    return hideBtn
-end
-
-for _, frame in pairs(sections) do
-    local hideBtn = addHideButtonToSection(frame)
-    hideBtn.MouseButton1Click:Connect(function()
-        gui.Enabled = false
-    end)
-end
-
--- --- Tecla P para ocultar/mostrar todo ---
-UIS.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.P then
-        gui.Enabled = not gui.Enabled
-    end
-end)
+-- FIN DE LA GUI Y FUNCIONALIDAD INTEGRADA
